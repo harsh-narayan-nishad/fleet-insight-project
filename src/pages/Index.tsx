@@ -10,10 +10,131 @@ import ForecastChart from "@/components/ForecastChart";
 import PurchaseMixChart from "@/components/PurchaseMixChart";
 import DataUpload from "@/components/DataUpload";
 import FleetMetrics from "@/components/FleetMetrics";
+import DataValidation from "@/components/DataValidation";
+import DateDrillDown from "@/components/DateDrillDown";
+import InteractiveCharts from "@/components/InteractiveCharts";
+import { CleaningReport } from "@/utils/dataCleaningUtils";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("2024-06-07");
   const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // Enhanced sample data with more realistic variations
+  const [fleetData, setFleetData] = useState([
+    {
+      id: 1,
+      licensePlate: "87JD-1",
+      startUp: "1992",
+      acquisitionValue: 210000.00,
+      lifeCycle: 21,
+      depYears: 14,
+      lcReplaceDate: "7/30/2013",
+      financeAdjustment: 14,
+      lcReplaceYear: "2027",
+      category: "Small",
+      status: "In Service"
+    },
+    {
+      id: 2,
+      licensePlate: "13GT-5",
+      startUp: "1992",
+      acquisitionValue: 210000.00,
+      lifeCycle: 21,
+      depYears: 14,
+      lcReplaceDate: "7/31/2013",
+      financeAdjustment: 16,
+      lcReplaceYear: "2029",
+      category: "Small",
+      status: "In Service"
+    },
+    {
+      id: 3,
+      licensePlate: "TAC48X",
+      startUp: "2004",
+      acquisitionValue: 4200.00,
+      lifeCycle: 21,
+      depYears: 14,
+      lcReplaceDate: "9/10/2025",
+      financeAdjustment: 4,
+      lcReplaceYear: "2029",
+      category: "Small",
+      status: "Running"
+    },
+    {
+      id: 4,
+      licensePlate: "NO PLATE",
+      startUp: "1970",
+      acquisitionValue: 150000.00,
+      lifeCycle: 25,
+      depYears: 14,
+      lcReplaceDate: "1/30/1995",
+      financeAdjustment: 32,
+      lcReplaceYear: "2027",
+      category: "Big",
+      status: "DIE"
+    },
+    {
+      id: 5,
+      licensePlate: "XR989A",
+      startUp: "2009",
+      acquisitionValue: 258215.34,
+      lifeCycle: 11,
+      depYears: 14,
+      lcReplaceDate: "9/21/2020",
+      financeAdjustment: 9,
+      lcReplaceYear: "2029",
+      category: "EV",
+      status: "In Service"
+    },
+    // Additional sample data for better demonstrations
+    {
+      id: 6,
+      licensePlate: "EV-101",
+      startUp: "2020",
+      acquisitionValue: 45000.00,
+      lifeCycle: 10,
+      depYears: 8,
+      lcReplaceDate: "1/15/2030",
+      financeAdjustment: 2,
+      lcReplaceYear: "2030",
+      category: "EV",
+      status: "In Service"
+    },
+    {
+      id: 7,
+      licensePlate: "BIG-TRUCK",
+      startUp: "2015",
+      acquisitionValue: 85000.00,
+      lifeCycle: 15,
+      depYears: 10,
+      lcReplaceDate: "6/20/2030",
+      financeAdjustment: 5,
+      lcReplaceYear: "2030",
+      category: "Big",
+      status: "In Service"
+    },
+    {
+      id: 8,
+      licensePlate: "",
+      startUp: "2018",
+      acquisitionValue: -1000,
+      lifeCycle: 12,
+      depYears: 6,
+      lcReplaceDate: "invalid-date",
+      financeAdjustment: 3,
+      lcReplaceYear: "2030",
+      category: "Small",
+      status: "Running"
+    }
+  ]);
+
+  const [dataQualityReport, setDataQualityReport] = useState<CleaningReport | null>(null);
+
+  const handleDataCleaned = (cleanedData: any[], report: CleaningReport) => {
+    setFleetData(cleanedData);
+    setDataQualityReport(report);
+    setLastUpdated(new Date().toISOString().split('T')[0]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -27,13 +148,22 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-slate-900">FleetForecaster</h1>
-                <p className="text-sm text-slate-500">Vehicle Fleet Planning & Forecasting</p>
+                <p className="text-sm text-slate-500">Advanced Fleet Planning & Analytics</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="outline" className="text-green-700 border-green-300">
                 Last Updated: {lastUpdated}
               </Badge>
+              {dataQualityReport && (
+                <Badge className={
+                  dataQualityReport.cleanRecords / dataQualityReport.totalRecords >= 0.9 
+                    ? "bg-green-100 text-green-800" 
+                    : "bg-yellow-100 text-yellow-800"
+                }>
+                  Data Quality: {Math.round((dataQualityReport.cleanRecords / dataQualityReport.totalRecords) * 100)}%
+                </Badge>
+              )}
               <DataUpload onUploadComplete={() => setLastUpdated(new Date().toISOString().split('T')[0])} />
             </div>
           </div>
@@ -43,8 +173,10 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-96">
+          <TabsList className="grid w-full grid-cols-6 lg:w-[600px]">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="quality">Data Quality</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="forecast">Forecast</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -106,6 +238,14 @@ const Index = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="quality">
+            <DataValidation data={fleetData} onDataCleaned={handleDataCleaned} />
+          </TabsContent>
+
+          <TabsContent value="timeline">
+            <DateDrillDown vehicles={fleetData} />
+          </TabsContent>
+
           <TabsContent value="inventory">
             <VehicleInventory />
           </TabsContent>
@@ -136,56 +276,66 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-slate-900">Data Quality Report</CardTitle>
-                  <CardDescription>Latest import status and data validation</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Records Processed</span>
-                      <Badge variant="outline">847</Badge>
+            <div className="space-y-6">
+              <InteractiveCharts vehicles={fleetData} />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-slate-900">Data Quality Report</CardTitle>
+                    <CardDescription>Latest import status and data validation</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Records Processed</span>
+                        <Badge variant="outline">{fleetData.length}</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Clean Records</span>
+                        <Badge className="bg-green-100 text-green-800">
+                          {dataQualityReport?.cleanRecords || fleetData.length - 2}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Records with Issues</span>
+                        <Badge variant="destructive">
+                          {dataQualityReport?.issuesFound || 2}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Missing License Plates</span>
+                        <Badge variant="secondary">
+                          {dataQualityReport?.missingLicensePlates || 1}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Clean Records</span>
-                      <Badge className="bg-green-100 text-green-800">834</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Records with Issues</span>
-                      <Badge variant="destructive">13</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Missing License Plates</span>
-                      <Badge variant="secondary">5</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-slate-900">Compliance Status</CardTitle>
-                  <CardDescription>Environmental and policy compliance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">EV Purchase Compliance</span>
-                      <Badge className="bg-blue-100 text-blue-800">On Track</Badge>
+                <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-slate-900">Compliance Status</CardTitle>
+                    <CardDescription>Environmental and policy compliance</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">EV Purchase Compliance</span>
+                        <Badge className="bg-blue-100 text-blue-800">On Track</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Lifecycle Management</span>
+                        <Badge className="bg-green-100 text-green-800">Good</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm">Cost Efficiency</span>
+                        <Badge className="bg-yellow-100 text-yellow-800">Review</Badge>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Lifecycle Management</span>
-                      <Badge className="bg-green-100 text-green-800">Good</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Cost Efficiency</span>
-                      <Badge className="bg-yellow-100 text-yellow-800">Review</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
