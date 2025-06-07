@@ -1,76 +1,65 @@
 
-import { Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const PurchaseMixChart = () => {
-  const data = {
-    labels: ['Small Vehicles', 'Large Vehicles', 'Electric Vehicles'],
-    datasets: [
-      {
-        data: [520, 207, 120],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(147, 51, 234, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-        ],
-        borderColor: [
-          'rgba(59, 130, 246, 1)',
-          'rgba(147, 51, 234, 1)',
-          'rgba(34, 197, 94, 1)',
-        ],
-        borderWidth: 2,
-        hoverBackgroundColor: [
-          'rgba(59, 130, 246, 0.9)',
-          'rgba(147, 51, 234, 0.9)',
-          'rgba(34, 197, 94, 0.9)',
-        ],
-      },
-    ],
+  const data = [
+    { name: 'Small Vehicles', value: 520, color: 'rgba(59, 130, 246, 0.8)' },
+    { name: 'Large Vehicles', value: 207, color: 'rgba(147, 51, 234, 0.8)' },
+    { name: 'Electric Vehicles', value: 120, color: 'rgba(34, 197, 94, 0.8)' },
+  ];
+
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const percentage = ((data.value / total) * 100).toFixed(1);
+      return (
+        <div className="bg-white/95 border border-slate-200 rounded-lg p-3 shadow-lg">
+          <p className="text-slate-900 font-medium">{`${data.name}: ${data.value} (${percentage}%)`}</p>
+        </div>
+      );
+    }
+    return null;
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          padding: 20,
-          usePointStyle: true,
-          font: {
-            size: 11,
-          },
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        titleColor: '#1e293b',
-        bodyColor: '#475569',
-        borderColor: '#e2e8f0',
-        borderWidth: 1,
-        cornerRadius: 8,
-        callbacks: {
-          label: function(context: any) {
-            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = ((context.parsed / total) * 100).toFixed(1);
-            return `${context.label}: ${context.parsed} (${percentage}%)`;
-          }
-        }
-      },
-    },
-    cutout: '60%',
+  const CustomLegend = ({ payload }: any) => {
+    return (
+      <div className="flex justify-center items-center space-x-6 mt-4">
+        {payload.map((entry: any, index: number) => (
+          <div key={index} className="flex items-center space-x-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: entry.color }}
+            ></div>
+            <span className="text-xs text-slate-600">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   return (
     <div className="h-64">
-      <Doughnut data={data} options={options} />
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="45%"
+            innerRadius={60}
+            outerRadius={90}
+            paddingAngle={2}
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+          <Legend content={<CustomLegend />} />
+        </PieChart>
+      </ResponsiveContainer>
     </div>
   );
 };
