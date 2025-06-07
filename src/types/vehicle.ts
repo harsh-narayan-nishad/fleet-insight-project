@@ -35,3 +35,30 @@ export interface YearStats {
   avgValue?: number;
   categories: Record<string, number>;
 }
+
+export interface CostParameters {
+  id?: string;
+  inflationRate: number;
+  tariffRate: number;
+  smallToEvRatio: number;
+  bigToEvRatio: number;
+  updatedBy?: string;
+  updatedAt?: string;
+  isActive?: boolean;
+}
+
+export interface CostParameterHistory {
+  id: string;
+  inflationRate: number;
+  tariffRate: number;
+  smallToEvRatio: number;
+  bigToEvRatio: number;
+  updatedBy: string;
+  updatedAt: string;
+  revertedAt?: string;
+}
+
+export interface UserRole {
+  role: 'Admin' | 'Manager' | 'Clerk';
+  canEditParameters: boolean;
+}

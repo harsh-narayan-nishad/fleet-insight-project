@@ -1,12 +1,30 @@
-
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { ForecastService } from '@/services/forecastService';
 
 const PurchaseMixChart = () => {
-  const data = [
+  const [data, setData] = useState([
     { name: 'Small Vehicles', value: 520, color: 'rgba(59, 130, 246, 0.8)' },
     { name: 'Large Vehicles', value: 207, color: 'rgba(147, 51, 234, 0.8)' },
     { name: 'Electric Vehicles', value: 120, color: 'rgba(34, 197, 94, 0.8)' },
-  ];
+  ]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadMixData();
+  }, []);
+
+  const loadMixData = async () => {
+    try {
+      const mixData = await ForecastService.getCurrentMix();
+      setData(mixData);
+    } catch (error) {
+      console.error('Error loading mix data:', error);
+      // Keep fallback data if service fails
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
@@ -38,6 +56,14 @@ const PurchaseMixChart = () => {
       </div>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-64 flex items-center justify-center">
+        <div className="text-slate-500">Loading mix data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-64">

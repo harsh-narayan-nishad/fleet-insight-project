@@ -13,115 +13,86 @@ import FleetMetrics from "@/components/FleetMetrics";
 import DataValidation from "@/components/DataValidation";
 import DateDrillDown from "@/components/DateDrillDown";
 import InteractiveCharts from "@/components/InteractiveCharts";
+import CostParametersPage from "@/components/CostParameters";
 import { CleaningReport } from "@/utils/dataCleaningUtils";
+import { CostParameters } from "@/types/vehicle";
+import { AuthService } from "@/services/authService";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("2024-06-07");
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [forecastKey, setForecastKey] = useState(0); // Force re-render of forecast components
   
-  // Enhanced sample data with more realistic variations
+  // Enhanced sample data with corrected types
   const [fleetData, setFleetData] = useState([
     {
-      id: 1,
+      id: "1",
       licensePlate: "87JD-1",
       startUp: "1992",
       acquisitionValue: 210000.00,
-      lifeCycle: 21,
-      depYears: 14,
-      lcReplaceDate: "7/30/2013",
-      financeAdjustment: 14,
       lcReplaceYear: "2027",
       category: "Small",
       status: "In Service"
     },
     {
-      id: 2,
+      id: "2",
       licensePlate: "13GT-5",
       startUp: "1992",
       acquisitionValue: 210000.00,
-      lifeCycle: 21,
-      depYears: 14,
-      lcReplaceDate: "7/31/2013",
-      financeAdjustment: 16,
       lcReplaceYear: "2029",
       category: "Small",
       status: "In Service"
     },
     {
-      id: 3,
+      id: "3",
       licensePlate: "TAC48X",
       startUp: "2004",
       acquisitionValue: 4200.00,
-      lifeCycle: 21,
-      depYears: 14,
-      lcReplaceDate: "9/10/2025",
-      financeAdjustment: 4,
       lcReplaceYear: "2029",
       category: "Small",
       status: "Running"
     },
     {
-      id: 4,
+      id: "4",
       licensePlate: "NO PLATE",
       startUp: "1970",
       acquisitionValue: 150000.00,
-      lifeCycle: 25,
-      depYears: 14,
-      lcReplaceDate: "1/30/1995",
-      financeAdjustment: 32,
       lcReplaceYear: "2027",
       category: "Big",
       status: "DIE"
     },
     {
-      id: 5,
+      id: "5",
       licensePlate: "XR989A",
       startUp: "2009",
       acquisitionValue: 258215.34,
-      lifeCycle: 11,
-      depYears: 14,
-      lcReplaceDate: "9/21/2020",
-      financeAdjustment: 9,
       lcReplaceYear: "2029",
       category: "EV",
       status: "In Service"
     },
-    // Additional sample data for better demonstrations
     {
-      id: 6,
+      id: "6",
       licensePlate: "EV-101",
       startUp: "2020",
       acquisitionValue: 45000.00,
-      lifeCycle: 10,
-      depYears: 8,
-      lcReplaceDate: "1/15/2030",
-      financeAdjustment: 2,
       lcReplaceYear: "2030",
       category: "EV",
       status: "In Service"
     },
     {
-      id: 7,
+      id: "7",
       licensePlate: "BIG-TRUCK",
       startUp: "2015",
       acquisitionValue: 85000.00,
-      lifeCycle: 15,
-      depYears: 10,
-      lcReplaceDate: "6/20/2030",
-      financeAdjustment: 5,
       lcReplaceYear: "2030",
       category: "Big",
       status: "In Service"
     },
     {
-      id: 8,
+      id: "8",
       licensePlate: "",
       startUp: "2018",
       acquisitionValue: -1000,
-      lifeCycle: 12,
-      depYears: 6,
-      lcReplaceDate: "invalid-date",
-      financeAdjustment: 3,
       lcReplaceYear: "2030",
       category: "Small",
       status: "Running"
@@ -129,10 +100,17 @@ const Index = () => {
   ]);
 
   const [dataQualityReport, setDataQualityReport] = useState<CleaningReport | null>(null);
+  const userRole = AuthService.getCurrentUserRole();
 
   const handleDataCleaned = (cleanedData: any[], report: CleaningReport) => {
     setFleetData(cleanedData);
     setDataQualityReport(report);
+    setLastUpdated(new Date().toISOString().split('T')[0]);
+  };
+
+  const handleParametersChanged = (parameters: CostParameters) => {
+    // Force re-render of forecast components by changing key
+    setForecastKey(prev => prev + 1);
     setLastUpdated(new Date().toISOString().split('T')[0]);
   };
 
@@ -164,6 +142,9 @@ const Index = () => {
                   Data Quality: {Math.round((dataQualityReport.cleanRecords / dataQualityReport.totalRecords) * 100)}%
                 </Badge>
               )}
+              <Badge variant="outline">
+                Role: {userRole.role}
+              </Badge>
               <DataUpload onUploadComplete={() => setLastUpdated(new Date().toISOString().split('T')[0])} />
             </div>
           </div>
@@ -173,13 +154,14 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 lg:w-[600px]">
+          <TabsList className="grid w-full grid-cols-7 lg:w-[700px]">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="quality">Data Quality</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="forecast">Forecast</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="parameters">Cost Params</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
@@ -194,7 +176,7 @@ const Index = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ForecastChart />
+                    <ForecastChart key={`forecast-${forecastKey}`} />
                   </CardContent>
                 </Card>
               </div>
@@ -206,7 +188,7 @@ const Index = () => {
                     <CardDescription>Current fleet composition</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <PurchaseMixChart />
+                    <PurchaseMixChart key={`mix-${forecastKey}`} />
                   </CardContent>
                 </Card>
 
@@ -263,11 +245,11 @@ const Index = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
                       <h3 className="text-lg font-semibold mb-4">Annual Spending Projection</h3>
-                      <ForecastChart />
+                      <ForecastChart key={`forecast-detail-${forecastKey}`} />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold mb-4">Vehicle Mix Evolution</h3>
-                      <PurchaseMixChart />
+                      <PurchaseMixChart key={`mix-detail-${forecastKey}`} />
                     </div>
                   </div>
                 </CardContent>
@@ -337,6 +319,10 @@ const Index = () => {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="parameters">
+            <CostParametersPage onParametersChanged={handleParametersChanged} />
           </TabsContent>
         </Tabs>
       </main>

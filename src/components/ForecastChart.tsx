@@ -1,20 +1,39 @@
-
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { ForecastService, ForecastData } from '@/services/forecastService';
 
 const ForecastChart = () => {
-  const data = [
-    { year: '2024', totalSpending: 2400000, evSpending: 340000 },
-    { year: '2025', totalSpending: 2650000, evSpending: 450000 },
-    { year: '2026', totalSpending: 2890000, evSpending: 580000 },
-    { year: '2027', totalSpending: 3150000, evSpending: 730000 },
-    { year: '2028', totalSpending: 3420000, evSpending: 920000 },
-    { year: '2029', totalSpending: 3700000, evSpending: 1150000 },
-    { year: '2030', totalSpending: 3980000, evSpending: 1420000 },
-    { year: '2031', totalSpending: 4280000, evSpending: 1730000 },
-    { year: '2032', totalSpending: 4590000, evSpending: 2080000 },
-    { year: '2033', totalSpending: 4920000, evSpending: 2470000 },
-    { year: '2034', totalSpending: 5270000, evSpending: 2900000 },
-  ];
+  const [data, setData] = useState<ForecastData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadForecastData();
+  }, []);
+
+  const loadForecastData = async () => {
+    try {
+      const forecastData = await ForecastService.generateForecast();
+      setData(forecastData);
+    } catch (error) {
+      console.error('Error loading forecast data:', error);
+      // Fallback to static data if service fails
+      setData([
+        { year: '2024', totalSpending: 2400000, evSpending: 340000, smallVehicles: 120, largeVehicles: 45, evVehicles: 30 },
+        { year: '2025', totalSpending: 2650000, evSpending: 450000, smallVehicles: 125, largeVehicles: 47, evVehicles: 35 },
+        { year: '2026', totalSpending: 2890000, evSpending: 580000 },
+        { year: '2027', totalSpending: 3150000, evSpending: 730000 },
+        { year: '2028', totalSpending: 3420000, evSpending: 920000 },
+        { year: '2029', totalSpending: 3700000, evSpending: 1150000 },
+        { year: '2030', totalSpending: 3980000, evSpending: 1420000 },
+        { year: '2031', totalSpending: 4280000, evSpending: 1730000 },
+        { year: '2032', totalSpending: 4590000, evSpending: 2080000 },
+        { year: '2033', totalSpending: 4920000, evSpending: 2470000 },
+        { year: '2034', totalSpending: 5270000, evSpending: 2900000 },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -35,6 +54,14 @@ const ForecastChart = () => {
   const formatYAxis = (value: number) => {
     return '$' + (value / 1000000).toFixed(1) + 'M';
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-80 flex items-center justify-center">
+        <div className="text-slate-500">Loading forecast data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-80">
