@@ -11,6 +11,24 @@ interface DateDrillDownProps {
   vehicles: any[];
 }
 
+interface Vehicle {
+  id?: string;
+  licensePlate: string;
+  lcReplaceYear?: string;
+  startUp?: string;
+  acquisitionValue?: number;
+  category?: string;
+  status?: string;
+}
+
+interface ProcessedYearData {
+  year: string;
+  count: number;
+  totalValue: number;
+  vehicles: Vehicle[];
+  avgValue: number;
+}
+
 const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [viewType, setViewType] = useState<"replacements" | "acquisitions" | "spending">("replacements");
@@ -19,12 +37,12 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
     const currentYear = new Date().getFullYear();
     const yearRange = Array.from({ length: 11 }, (_, i) => currentYear + i);
     
-    const replacementData = yearRange.map(year => {
-      const replacements = vehicles.filter(v => 
-        parseInt(v.lcReplaceYear) === year
+    const replacementData: ProcessedYearData[] = yearRange.map(year => {
+      const replacements = vehicles.filter((v: Vehicle) => 
+        parseInt(v.lcReplaceYear || '') === year
       );
       
-      const totalValue = replacements.reduce((sum, v) => sum + (v.acquisitionValue || 0), 0);
+      const totalValue = replacements.reduce((sum: number, v: Vehicle) => sum + (v.acquisitionValue || 0), 0);
       
       return {
         year: year.toString(),
@@ -35,14 +53,16 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
       };
     });
 
-    const acquisitionData = vehicles.reduce((acc, vehicle) => {
+    const acquisitionData = vehicles.reduce((acc: Record<string, Vehicle[]>, vehicle: Vehicle) => {
       const year = vehicle.startUp;
-      if (!acc[year]) {
-        acc[year] = [];
+      if (year) {
+        if (!acc[year]) {
+          acc[year] = [];
+        }
+        acc[year].push(vehicle);
       }
-      acc[year].push(vehicle);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {});
 
     return {
       replacementData: replacementData.filter(d => d.count > 0),
@@ -55,9 +75,9 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
     if (selectedYear === "all") return vehicles;
     
     if (viewType === "replacements") {
-      return vehicles.filter(v => v.lcReplaceYear === selectedYear);
+      return vehicles.filter((v: Vehicle) => v.lcReplaceYear === selectedYear);
     } else if (viewType === "acquisitions") {
-      return vehicles.filter(v => v.startUp === selectedYear);
+      return vehicles.filter((v: Vehicle) => v.startUp === selectedYear);
     }
     
     return vehicles;
@@ -75,7 +95,7 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
     return Object.entries(processedData.acquisitionData).map(([year, vehs]) => ({
       year,
       value: vehs.length,
-      spending: vehs.reduce((sum, v) => sum + (v.acquisitionValue || 0), 0) / 1000000
+      spending: vehs.reduce((sum: number, v: Vehicle) => sum + (v.acquisitionValue || 0), 0) / 1000000
     })).sort((a, b) => parseInt(a.year) - parseInt(b.year));
   };
 
@@ -85,11 +105,11 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
     const years = new Set<string>();
     
     if (viewType === "replacements") {
-      vehicles.forEach(v => {
+      vehicles.forEach((v: Vehicle) => {
         if (v.lcReplaceYear) years.add(v.lcReplaceYear);
       });
     } else {
-      vehicles.forEach(v => {
+      vehicles.forEach((v: Vehicle) => {
         if (v.startUp) years.add(v.startUp);
       });
     }
@@ -101,11 +121,12 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
     if (selectedYear === "all") {
       return {
         totalVehicles: filteredVehicles.length,
-        totalValue: filteredVehicles.reduce((sum, v) => sum + (v.acquisitionValue || 0), 0),
-        categories: filteredVehicles.reduce((acc, v) => {
-          acc[v.category] = (acc[v.category] || 0) + 1;
+        totalValue: filteredVehicles.reduce((sum: number, v: Vehicle) => sum + (v.acquisitionValue || 0), 0),
+        categories: filteredVehicles.reduce((acc: Record<string, number>, v: Vehicle) => {
+          const category = v.category || 'Unknown';
+          acc[category] = (acc[category] || 0) + 1;
           return acc;
-        }, {} as Record<string, number>)
+        }, {})
       };
     }
 
@@ -115,8 +136,9 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
         totalVehicles: yearData.count,
         totalValue: yearData.totalValue,
         avgValue: yearData.avgValue,
-        categories: yearData.vehicles.reduce((acc: Record<string, number>, v: any) => {
-          acc[v.category] = (acc[v.category] || 0) + 1;
+        categories: yearData.vehicles.reduce((acc: Record<string, number>, v: Vehicle) => {
+          const category = v.category || 'Unknown';
+          acc[category] = (acc[category] || 0) + 1;
           return acc;
         }, {})
       };
@@ -179,8 +201,8 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
                     <XAxis dataKey="year" />
                     <YAxis />
                     <Tooltip 
-                      formatter={(value, name) => [
-                        name === 'value' ? `${value} vehicles` : `$${value.toFixed(1)}M`,
+                      formatter={(value: any, name: string) => [
+                        name === 'value' ? `${value} vehicles` : `$${typeof value === 'number' ? value.toFixed(1) : value}M`,
                         name === 'value' ? 'Count' : 'Spending'
                       ]}
                     />
@@ -245,20 +267,20 @@ const DateDrillDown = ({ vehicles }: DateDrillDownProps) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredVehicles.slice(0, 10).map((vehicle, index) => (
+                  {filteredVehicles.slice(0, 10).map((vehicle: Vehicle, index: number) => (
                     <tr key={index} className="border-b border-slate-100">
                       <td className="py-2 px-3 font-medium">{vehicle.licensePlate}</td>
                       <td className="py-2 px-3">
-                        <Badge variant="outline">{vehicle.category}</Badge>
+                        <Badge variant="outline">{vehicle.category || 'Unknown'}</Badge>
                       </td>
-                      <td className="py-2 px-3">${vehicle.acquisitionValue?.toLocaleString()}</td>
+                      <td className="py-2 px-3">${vehicle.acquisitionValue?.toLocaleString() || 'N/A'}</td>
                       <td className="py-2 px-3">
                         <Badge className={
                           vehicle.status === "In Service" ? "bg-green-100 text-green-800" : 
                           vehicle.status === "Running" ? "bg-blue-100 text-blue-800" :
                           "bg-red-100 text-red-800"
                         }>
-                          {vehicle.status}
+                          {vehicle.status || 'Unknown'}
                         </Badge>
                       </td>
                     </tr>
