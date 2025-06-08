@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,13 +17,14 @@ import CostParametersPage from "@/components/CostParameters";
 import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import AdvancedAnalytics from "@/components/AdvancedAnalytics";
 import EnterpriseReporting from "@/components/EnterpriseReporting";
+import FleetAnalyticsDashboard from "@/components/FleetAnalyticsDashboard";
 import { CleaningReport } from "@/utils/dataCleaningUtils";
 import { CostParameters } from "@/types/vehicle";
 import { AuthService } from "@/services/authService";
 
 const Index = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("2024-06-07");
-  const [activeTab, setActiveTab] = useState("executive");
+  const [activeTab, setActiveTab] = useState("fleet-analytics");
   const [forecastKey, setForecastKey] = useState(0);
   
   // Enhanced sample data with corrected types
@@ -155,9 +157,10 @@ const Index = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 lg:w-[800px]">
+          <TabsList className="grid w-full grid-cols-9 lg:w-[900px]">
+            <TabsTrigger value="fleet-analytics">Analytics</TabsTrigger>
             <TabsTrigger value="executive">Executive</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="quality">Data Quality</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -166,11 +169,15 @@ const Index = () => {
             <TabsTrigger value="parameters">Settings</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="fleet-analytics" className="space-y-6">
+            <FleetAnalyticsDashboard />
+          </TabsContent>
+
           <TabsContent value="executive" className="space-y-6">
             <ExecutiveDashboard />
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
+          <TabsContent value="advanced" className="space-y-6">
             <AdvancedAnalytics />
           </TabsContent>
 
