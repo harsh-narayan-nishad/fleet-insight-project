@@ -20,15 +20,15 @@ const ForecastChart = () => {
       setData([
         { year: '2024', totalSpending: 2400000, evSpending: 340000, smallVehicles: 120, largeVehicles: 45, evVehicles: 30 },
         { year: '2025', totalSpending: 2650000, evSpending: 450000, smallVehicles: 125, largeVehicles: 47, evVehicles: 35 },
-        { year: '2026', totalSpending: 2890000, evSpending: 580000 },
-        { year: '2027', totalSpending: 3150000, evSpending: 730000 },
-        { year: '2028', totalSpending: 3420000, evSpending: 920000 },
-        { year: '2029', totalSpending: 3700000, evSpending: 1150000 },
-        { year: '2030', totalSpending: 3980000, evSpending: 1420000 },
-        { year: '2031', totalSpending: 4280000, evSpending: 1730000 },
-        { year: '2032', totalSpending: 4590000, evSpending: 2080000 },
-        { year: '2033', totalSpending: 4920000, evSpending: 2470000 },
-        { year: '2034', totalSpending: 5270000, evSpending: 2900000 },
+        { year: '2026', totalSpending: 2890000, evSpending: 580000, smallVehicles: 130, largeVehicles: 49, evVehicles: 40 },
+        { year: '2027', totalSpending: 3150000, evSpending: 730000, smallVehicles: 135, largeVehicles: 51, evVehicles: 45 },
+        { year: '2028', totalSpending: 3420000, evSpending: 920000, smallVehicles: 140, largeVehicles: 53, evVehicles: 50 },
+        { year: '2029', totalSpending: 3700000, evSpending: 1150000, smallVehicles: 145, largeVehicles: 55, evVehicles: 55 },
+        { year: '2030', totalSpending: 3980000, evSpending: 1420000, smallVehicles: 150, largeVehicles: 57, evVehicles: 60 },
+        { year: '2031', totalSpending: 4280000, evSpending: 1730000, smallVehicles: 155, largeVehicles: 59, evVehicles: 65 },
+        { year: '2032', totalSpending: 4590000, evSpending: 2080000, smallVehicles: 160, largeVehicles: 61, evVehicles: 70 },
+        { year: '2033', totalSpending: 4920000, evSpending: 2470000, smallVehicles: 165, largeVehicles: 63, evVehicles: 75 },
+        { year: '2034', totalSpending: 5270000, evSpending: 2900000, smallVehicles: 170, largeVehicles: 65, evVehicles: 80 },
       ]);
     } finally {
       setIsLoading(false);
