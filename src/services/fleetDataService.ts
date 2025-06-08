@@ -198,6 +198,7 @@ export class FleetDataService {
     return Object.entries(yearData)
       .map(([year, data]) => ({
         year,
+        value: data.forecast + data.replacement, // Add value property
         forecast: data.forecast,
         replacement: data.replacement,
         rawData: data.vehicles

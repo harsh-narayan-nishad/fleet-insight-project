@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,10 +22,11 @@ const FleetAnalyticsDashboard = () => {
   const top10Expensive = FleetDataService.getTop10MostExpensive();
   const pendingVehicles = FleetDataService.getPendingVehicles();
 
-  const handleChartClick = (data: ChartDataPoint, chartTitle: string) => {
+  const handleChartClick = (data: any, chartTitle: string) => {
     console.log('Chart clicked:', data, chartTitle);
     
-    if (data.rawData && data.rawData.length > 0) {
+    // Handle different chart click events
+    if (data && data.rawData && data.rawData.length > 0) {
       const totalValue = data.rawData.reduce((sum, vehicle) => 
         sum + (vehicle.acquisitionValue || 0), 0
       );

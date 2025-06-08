@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,11 +17,18 @@ import ExecutiveDashboard from "@/components/ExecutiveDashboard";
 import AdvancedAnalytics from "@/components/AdvancedAnalytics";
 import EnterpriseReporting from "@/components/EnterpriseReporting";
 import FleetAnalyticsDashboard from "@/components/FleetAnalyticsDashboard";
+import LoginPage from "@/components/auth/LoginPage";
+import Sidebar from "@/components/layout/Sidebar";
+import TopBar from "@/components/layout/TopBar";
+import QuickFilters from "@/components/dashboard/QuickFilters";
+import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import { CleaningReport } from "@/utils/dataCleaningUtils";
 import { CostParameters } from "@/types/vehicle";
 import { AuthService } from "@/services/authService";
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<string>('');
   const [lastUpdated, setLastUpdated] = useState<string>("2024-06-07");
   const [activeTab, setActiveTab] = useState("fleet-analytics");
   const [forecastKey, setForecastKey] = useState(0);
@@ -106,6 +112,35 @@ const Index = () => {
   const [dataQualityReport, setDataQualityReport] = useState<CleaningReport | null>(null);
   const userRole = AuthService.getCurrentUserRole();
 
+  // Mock login function
+  const handleLogin = async (username: string, password: string, rememberMe: boolean): Promise<boolean> => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock authentication - in real app, this would call your auth API
+    if (username && password) {
+      setIsAuthenticated(true);
+      setCurrentUser(username);
+      return true;
+    }
+    return false;
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser('');
+  };
+
+  const handleExport = () => {
+    // Mock export functionality
+    console.log('Exporting data...');
+  };
+
+  const handleFiltersChange = (filters: any) => {
+    console.log('Filters changed:', filters);
+    // Apply filters to data
+  };
+
   const handleDataCleaned = (cleanedData: any[], report: CleaningReport) => {
     setFleetData(cleanedData);
     setDataQualityReport(report);
@@ -117,118 +152,101 @@ const Index = () => {
     setLastUpdated(new Date().toISOString().split('T')[0]);
   };
 
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">FI</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      <div className="flex-1 flex flex-col">
+        <TopBar 
+          userName={currentUser}
+          lastUpdated={lastUpdated}
+          dataQualityScore={dataQualityReport ? Math.round((dataQualityReport.cleanRecords / dataQualityReport.totalRecords) * 100) : 95}
+          onExport={handleExport}
+          onLogout={handleLogout}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Quick Filters */}
+            <QuickFilters onFiltersChange={handleFiltersChange} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-3">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                  <TabsContent value="fleet-analytics" className="space-y-6">
+                    <FleetAnalyticsDashboard />
+                  </TabsContent>
+
+                  <TabsContent value="executive" className="space-y-6">
+                    <ExecutiveDashboard />
+                  </TabsContent>
+
+                  <TabsContent value="advanced" className="space-y-6">
+                    <AdvancedAnalytics />
+                  </TabsContent>
+
+                  <TabsContent value="reports" className="space-y-6">
+                    <EnterpriseReporting />
+                  </TabsContent>
+
+                  <TabsContent value="quality">
+                    <DataValidation data={fleetData} onDataCleaned={handleDataCleaned} />
+                  </TabsContent>
+
+                  <TabsContent value="timeline">
+                    <DateDrillDown vehicles={fleetData} />
+                  </TabsContent>
+
+                  <TabsContent value="inventory">
+                    <VehicleInventory />
+                  </TabsContent>
+
+                  <TabsContent value="forecast">
+                    <div className="space-y-6">
+                      <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
+                        <CardHeader>
+                          <CardTitle className="text-slate-900">Fleet Forecast Analysis</CardTitle>
+                          <CardDescription>
+                            Detailed 10-year projections with scenario planning
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                              <h3 className="text-lg font-semibold mb-4">Annual Spending Projection</h3>
+                              <ForecastChart key={`forecast-detail-${forecastKey}`} />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold mb-4">Vehicle Mix Evolution</h3>
+                              <PurchaseMixChart key={`mix-detail-${forecastKey}`} />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <InteractiveCharts vehicles={fleetData} />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="parameters">
+                    <CostParametersPage onParametersChanged={handleParametersChanged} />
+                  </TabsContent>
+                </Tabs>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Fleet Insight</h1>
-                <p className="text-sm text-slate-500">Enterprise Fleet Management & Analytics</p>
+
+              {/* Alerts Panel */}
+              <div className="lg:col-span-1">
+                <AlertsPanel />
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="text-green-700 border-green-300">
-                Last Updated: {lastUpdated}
-              </Badge>
-              {dataQualityReport && (
-                <Badge className={
-                  dataQualityReport.cleanRecords / dataQualityReport.totalRecords >= 0.9 
-                    ? "bg-green-100 text-green-800" 
-                    : "bg-yellow-100 text-yellow-800"
-                }>
-                  Data Quality: {Math.round((dataQualityReport.cleanRecords / dataQualityReport.totalRecords) * 100)}%
-                </Badge>
-              )}
-              <Badge variant="outline">
-                Role: {userRole.role}
-              </Badge>
-              <DataUpload onUploadComplete={() => setLastUpdated(new Date().toISOString().split('T')[0])} />
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 lg:w-[900px]">
-            <TabsTrigger value="fleet-analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="executive">Executive</TabsTrigger>
-            <TabsTrigger value="advanced">Advanced</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="quality">Data Quality</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            <TabsTrigger value="forecast">Forecast</TabsTrigger>
-            <TabsTrigger value="parameters">Settings</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="fleet-analytics" className="space-y-6">
-            <FleetAnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="executive" className="space-y-6">
-            <ExecutiveDashboard />
-          </TabsContent>
-
-          <TabsContent value="advanced" className="space-y-6">
-            <AdvancedAnalytics />
-          </TabsContent>
-
-          <TabsContent value="reports" className="space-y-6">
-            <EnterpriseReporting />
-          </TabsContent>
-
-          <TabsContent value="quality">
-            <DataValidation data={fleetData} onDataCleaned={handleDataCleaned} />
-          </TabsContent>
-
-          <TabsContent value="timeline">
-            <DateDrillDown vehicles={fleetData} />
-          </TabsContent>
-
-          <TabsContent value="inventory">
-            <VehicleInventory />
-          </TabsContent>
-
-          <TabsContent value="forecast">
-            <div className="space-y-6">
-              <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-slate-900">Fleet Forecast Analysis</CardTitle>
-                  <CardDescription>
-                    Detailed 10-year projections with scenario planning
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Annual Spending Projection</h3>
-                      <ForecastChart key={`forecast-detail-${forecastKey}`} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Vehicle Mix Evolution</h3>
-                      <PurchaseMixChart key={`mix-detail-${forecastKey}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <InteractiveCharts vehicles={fleetData} />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="parameters">
-            <CostParametersPage onParametersChanged={handleParametersChanged} />
-          </TabsContent>
-        </Tabs>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
