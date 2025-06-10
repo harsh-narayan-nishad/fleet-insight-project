@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -158,7 +159,6 @@ const FleetAnalyticsDashboard = () => {
                         stroke="#3B82F6" 
                         strokeWidth={3}
                         dot={{ fill: '#3B82F6', strokeWidth: 2, r: 6, cursor: 'pointer' }}
-                        onClick={(data) => handleChartClick(data.payload, '10-Year Replacement Cost Trend')}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -183,14 +183,12 @@ const FleetAnalyticsDashboard = () => {
                         dataKey="forecast" 
                         fill="#10B981" 
                         name="Forecast Spend"
-                        onClick={(data) => handleChartClick(data, 'Forecast Spend')}
                         style={{ cursor: 'pointer' }}
                       />
                       <Bar 
                         dataKey="replacement" 
                         fill="#3B82F6" 
                         name="Replacement Cost"
-                        onClick={(data) => handleChartClick(data, 'Replacement Cost')}
                         style={{ cursor: 'pointer' }}
                       />
                     </BarChart>
@@ -218,7 +216,6 @@ const FleetAnalyticsDashboard = () => {
                         cy="50%"
                         outerRadius={100}
                         dataKey="count"
-                        onClick={(data) => handleChartClick(data, 'Vehicle Class Distribution')}
                         style={{ cursor: 'pointer' }}
                       >
                         {vehicleClassData.map((entry, index) => (
@@ -248,7 +245,6 @@ const FleetAnalyticsDashboard = () => {
                       <Bar 
                         dataKey="value" 
                         fill="#F59E0B"
-                        onClick={(data) => handleChartClick(data, 'Most Expensive Equipment')}
                         style={{ cursor: 'pointer' }}
                       />
                     </BarChart>
@@ -276,7 +272,6 @@ const FleetAnalyticsDashboard = () => {
                     <Bar 
                       dataKey="value" 
                       fill="#8B5CF6"
-                      onClick={(data) => handleChartClick(data, 'Radio Equipment Spend')}
                       style={{ cursor: 'pointer' }}
                     />
                   </BarChart>
