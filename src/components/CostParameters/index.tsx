@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -7,6 +6,7 @@ import { CostParametersService } from '@/services/costParametersService';
 import { AuthService } from '@/services/authService';
 import CostParametersForm from './CostParametersForm';
 import ParameterHistory from './ParameterHistory';
+import CSVExportImport from './CSVExportImport';
 
 interface CostParametersPageProps {
   onParametersChanged?: (parameters: CostParameters) => void;
@@ -51,6 +51,15 @@ const CostParametersPage = ({ onParametersChanged }: CostParametersPageProps) =>
     });
   };
 
+  const handleDataUpdated = () => {
+    // Refresh any data that might have been imported
+    loadCurrentParameters();
+    toast({
+      title: "Data Refreshed",
+      description: "Data has been refreshed after import.",
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto space-y-6">
@@ -78,9 +87,9 @@ const CostParametersPage = ({ onParametersChanged }: CostParametersPageProps) =>
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Cost Parameters Management</h1>
+          <h1 className="text-2xl font-bold">Financial Parameters Management</h1>
           <p className="text-muted-foreground">
-            Configure cost drivers for fleet forecasting and analysis
+            Configure cost drivers for fleet forecasting, manage equipment categories, and export data
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -94,11 +103,12 @@ const CostParametersPage = ({ onParametersChanged }: CostParametersPageProps) =>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <CostParametersForm
             currentParameters={currentParameters}
             onParametersUpdated={handleParametersUpdated}
           />
+          <CSVExportImport onDataUpdated={handleDataUpdated} />
         </div>
         <div>
           <div className="bg-muted/50 rounded-lg p-4 space-y-3">
