@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom'; // #routing
 
 interface LoginPageProps {
   onLogin: (username: string, password: string, rememberMe: boolean) => Promise<boolean>;
@@ -151,8 +151,14 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
               </Button>
             </form>
 
-            <div className="text-center text-sm text-slate-500">
-              Need access? Contact your fleet administrator
+            <div className="text-center text-sm text-slate-500"> {/* #routing */}
+              Don't have an account?{' '} {/* #routing */}
+              <Link // #routing
+                to="/signup" // #routing
+                className="text-teal-600 hover:text-teal-700 font-medium" // #routing
+              >
+                Create one here
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -4,8 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // #routing
 import LoginPage from "./components/auth/LoginPage";
+import SignupPage from "./components/auth/SignupPage"; // #signup
 import Dashboard from "./pages/Dashboard";
 import FleetAnalyticsPage from "./pages/FleetAnalyticsPage";
 import ExecutivePage from "./pages/ExecutivePage";
@@ -36,6 +37,17 @@ const App = () => {
     return false;
   };
 
+  const handleSignup = async (username: string, email: string, password: string, consent: boolean): Promise<boolean> => { // #signup
+    await new Promise(resolve => setTimeout(resolve, 1000)); // #signup
+    
+    if (username && email && password && consent) { // #signup
+      setIsAuthenticated(true); // #signup
+      setCurrentUser(username); // #signup
+      return true; // #signup
+    }
+    return false; // #signup
+  };
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser('');
@@ -52,7 +64,11 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <LoginPage onLogin={handleLogin} />
+            <Routes> {/* #routing */}
+              <Route path="/login" element={<LoginPage onLogin={handleLogin} />} /> {/* #routing */}
+              <Route path="/signup" element={<SignupPage onSignup={handleSignup} />} /> {/* #signup #routing */}
+              <Route path="*" element={<Navigate to="/login" replace />} /> {/* #routing */}
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
