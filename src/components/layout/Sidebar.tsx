@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
@@ -13,23 +14,30 @@ import {
   Calendar
 } from 'lucide-react';
 
+const menuItems = [
+  { id: 'fleet-analytics', label: 'Overview', icon: Home, path: '/fleet-analytics' },
+  { id: 'executive', label: 'Executive', icon: LayoutDashboard, path: '/executive' },
+  { id: 'forecast', label: 'Forecasts', icon: TrendingUp, path: '/forecast' },
+  { id: 'inventory', label: 'Vehicles', icon: Truck, path: '/inventory' },
+  { id: 'reports', label: 'Reports', icon: FileText, path: '/reports' },
+  { id: 'timeline', label: 'Timeline', icon: Calendar, path: '/timeline' },
+  { id: 'parameters', label: 'Settings', icon: Settings, path: '/parameters' },
+];
+
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
-const menuItems = [
-  { id: 'fleet-analytics', label: 'Overview', icon: Home },
-  { id: 'executive', label: 'Executive', icon: LayoutDashboard },
-  { id: 'forecast', label: 'Forecasts', icon: TrendingUp },
-  { id: 'inventory', label: 'Vehicles', icon: Truck },
-  { id: 'reports', label: 'Reports', icon: FileText },
-  { id: 'timeline', label: 'Timeline', icon: Calendar },
-  { id: 'parameters', label: 'Settings', icon: Settings },
-];
-
 const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigation = (item: typeof menuItems[0]) => {
+    onTabChange(item.id);
+    navigate(item.path);
+  };
 
   return (
     <div className={cn(
@@ -64,7 +72,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         <div className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = location.pathname === item.path || activeTab === item.id;
             
             return (
               <Button
@@ -76,7 +84,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                   isActive && "bg-teal-50 text-teal-700 border-r-2 border-teal-600",
                   !isActive && "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 )}
-                onClick={() => onTabChange(item.id)}
+                onClick={() => handleNavigation(item)}
               >
                 <Icon className={cn(
                   "h-4 w-4",

@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Truck } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface LoginPageProps {
   onLogin: (username: string, password: string, rememberMe: boolean) => Promise<boolean>;
@@ -19,7 +18,6 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,12 +26,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
 
     try {
       const success = await onLogin(username, password, rememberMe);
-      if (success) {
-        // Smooth transition to dashboard
-        setTimeout(() => {
-          navigate('/');
-        }, 300);
-      } else {
+      if (!success) {
         setError('Invalid credentials. Please try again.');
       }
     } catch (err) {
@@ -45,8 +38,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"4\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
       
       <div className="relative z-10 w-full max-w-md animate-fade-in">
         <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
