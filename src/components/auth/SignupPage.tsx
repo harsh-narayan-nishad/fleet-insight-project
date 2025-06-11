@@ -222,7 +222,7 @@ const SignupPage = ({ onSignup }: SignupPageProps) => { // #signup
             <div className="text-center text-sm text-slate-500"> {/* #signup */}
               Already have an account?{' '} {/* #signup */}
               <Link // #routing
-                to="/" // #routing
+                to="/login" // #routing
                 className="text-teal-600 hover:text-teal-700 font-medium" // #routing
               >
                 Sign in here

@@ -6,12 +6,13 @@ import {
   BarChart3, 
   Calendar,
   Settings,
+  FileText,
   Users,
   TrendingUp,
   Database,
   Wrench,
   TargetIcon,
-  ArrowLeft
+  GitBranch
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -66,6 +67,12 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       path: '/forecast',
     },
     {
+      id: 'reports',
+      label: 'Reports',
+      icon: FileText,
+      path: '/reports',
+    },
+    {
       id: 'executive',
       label: 'Executive View',
       icon: Users,
@@ -78,18 +85,6 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       <div className="p-6 border-b border-slate-200">
         <h1 className="text-xl font-bold text-slate-900">Fleet Capital Planning</h1>
         <p className="text-sm text-slate-600 mt-1">Vehicle Replacement Forecasting</p>
-        
-        {/* Back Button */}
-        <Link to="/">
-          <Button
-            variant="outline"
-            size="sm"
-            className="mt-3 w-full justify-start gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Homepage
-          </Button>
-        </Link>
       </div>
       
       <nav className="flex-1 p-4 space-y-2">
