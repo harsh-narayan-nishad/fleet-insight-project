@@ -1,31 +1,32 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { FinancialDataService } from '@/services/financialDataService';
-import { Download, Upload } from 'lucide-react';
+import { CSVExportData } from '@/types/financial';
+import { Download, Upload, FileText } from 'lucide-react';
 
 interface CSVExportImportProps {
   onDataUpdated?: () => void;
 }
 
 const CSVExportImport = ({ onDataUpdated }: CSVExportImportProps) => {
-  const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
+  const [exportType, setExportType] = useState<CSVExportData['type']>('cost-parameters');
+  const [importing, setImporting] = useState(false);
   const { toast } = useToast();
 
-  const handleExport = async (type: 'cost-parameters' | 'equipment-categories' | 'price-history') => {
-    setIsExporting(true);
+  const handleExport = () => {
     try {
-      const csvContent = FinancialDataService.exportToCSV(type);
-      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const csvData = FinancialDataService.exportToCSV(exportType);
+      
+      // Create and download the CSV file
+      const blob = new Blob([csvData], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${type}-${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `${exportType}-${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -33,43 +34,63 @@ const CSVExportImport = ({ onDataUpdated }: CSVExportImportProps) => {
 
       toast({
         title: "Export Successful",
-        description: `${type.replace('-', ' ')} data exported successfully.`,
+        description: `${exportType} data has been exported to CSV.`,
       });
     } catch (error) {
       toast({
         title: "Export Failed",
-        description: error instanceof Error ? error.message : "Failed to export data.",
+        description: "There was an error exporting the data.",
         variant: "destructive",
       });
-    } finally {
-      setIsExporting(false);
     }
   };
 
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>, type: 'equipment-categories' | 'price-history') => {
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setIsImporting(true);
-    try {
-      const text = await file.text();
-      FinancialDataService.importFromCSV(text, type);
-      onDataUpdated?.();
+    setImporting(true);
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const csvData = e.target?.result as string;
+        FinancialDataService.importFromCSV(csvData, exportType);
+        
+        toast({
+          title: "Import Successful",
+          description: `${exportType} data has been imported successfully.`,
+        });
+        
+        onDataUpdated?.();
+      } catch (error) {
+        toast({
+          title: "Import Failed",
+          description: "There was an error importing the CSV data. Please check the file format.",
+          variant: "destructive",
+        });
+      } finally {
+        setImporting(false);
+        // Reset the input
+        event.target.value = '';
+      }
+    };
 
-      toast({
-        title: "Import Successful",
-        description: `${type.replace('-', ' ')} data imported successfully.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Failed to import data.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsImporting(false);
-      // Reset the input
-      event.target.value = '';
+    reader.readAsText(file);
+  };
+
+  const getTypeLabel = (type: CSVExportData['type']) => {
+    switch (type) {
+      case 'cost-parameters':
+        return 'Cost Parameters';
+      case 'equipment-categories':
+        return 'Equipment Categories';
+      case 'price-history':
+        return 'Price History';
+      case 'forecast-results':
+        return 'Forecast Scenarios';
+      default:
+        return type;
     }
   };
 
@@ -77,90 +98,57 @@ const CSVExportImport = ({ onDataUpdated }: CSVExportImportProps) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Download className="h-5 w-5" />
-          Data Export & Import
+          <FileText className="h-5 w-5" />
+          CSV Data Management
         </CardTitle>
-        <CardDescription>
-          Export financial data to CSV for Power BI integration or import updated data
-        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <div>
-          <h4 className="font-medium mb-3">Export Data</h4>
-          <div className="flex flex-wrap gap-2">
+          <label className="block text-sm font-medium mb-2">Data Type</label>
+          <Select value={exportType} onValueChange={(value: CSVExportData['type']) => setExportType(value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select data type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cost-parameters">Cost Parameters</SelectItem>
+              <SelectItem value="equipment-categories">Equipment Categories</SelectItem>
+              <SelectItem value="price-history">Price History</SelectItem>
+              <SelectItem value="forecast-results">Forecast Scenarios</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-3">
+          <Button onClick={handleExport} variant="outline" className="flex-1">
+            <Download className="h-4 w-4 mr-2" />
+            Export {getTypeLabel(exportType)}
+          </Button>
+          
+          <div className="flex-1">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleImport}
+              disabled={importing}
+              className="hidden"
+              id="csv-import"
+            />
             <Button
+              onClick={() => document.getElementById('csv-import')?.click()}
+              disabled={importing}
               variant="outline"
-              size="sm"
-              onClick={() => handleExport('cost-parameters')}
-              disabled={isExporting}
-              className="flex items-center gap-2"
+              className="w-full"
             >
-              <Download className="h-4 w-4" />
-              Cost Parameters
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleExport('equipment-categories')}
-              disabled={isExporting}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Equipment Categories
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleExport('price-history')}
-              disabled={isExporting}
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Price History
+              <Upload className="h-4 w-4 mr-2" />
+              {importing ? 'Importing...' : `Import ${getTypeLabel(exportType)}`}
             </Button>
           </div>
         </div>
 
-        <div>
-          <h4 className="font-medium mb-3">Import Data</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="equipment-import">Equipment Categories</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="equipment-import"
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => handleImport(e, 'equipment-categories')}
-                  disabled={isImporting}
-                  className="file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium"
-                />
-                <Upload className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price-import">Price History</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="price-import"
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => handleImport(e, 'price-history')}
-                  disabled={isImporting}
-                  className="file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-medium"
-                />
-                <Upload className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-muted/50 rounded-lg p-4">
-          <h5 className="font-medium text-sm mb-2">Power BI Integration</h5>
-          <p className="text-sm text-muted-foreground">
-            Exported CSV files are formatted for direct import into Power BI. 
-            Use the "Get Data > Text/CSV" option in Power BI to import these files.
-          </p>
+        <div className="text-xs text-muted-foreground space-y-1">
+          <p>• Export current data to CSV format for external analysis</p>
+          <p>• Import CSV data to update the system (use the same format as exported files)</p>
+          <p>• Equipment categories and price history support bulk updates via CSV</p>
         </div>
       </CardContent>
     </Card>
