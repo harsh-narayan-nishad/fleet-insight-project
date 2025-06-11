@@ -278,14 +278,6 @@ const FleetFiltersPanel = ({ activeFilters, onFiltersChange }: FiltersPanelProps
               <strong>Note:</strong> Cost center values are placeholder. Please provide the actual cost center codes/names to populate this filter.
             </p>
           </div>
-
-          {/* Back Coast Rule Placeholder */}
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              <strong>Back Coast Rule:</strong> Please define which vehicles qualify for radio equipment costs 
-              (e.g., specific locations, vehicle types, or other criteria) to enable radio cost calculations.
-            </p>
-          </div>
         </CardContent>
       )}
     </Card>
