@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -37,20 +38,41 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Pastel Vibrant Fleet Theme */
+    --fleet-primary: 262 83% 58%;
+    --fleet-primary-foreground: 0 0% 98%;
+    --fleet-secondary: 221 83% 53%;
+    --fleet-secondary-foreground: 0 0% 98%;
+    --fleet-accent-purple: 292 84% 61%;
+    --fleet-accent-pink: 330 81% 60%;
+    --fleet-accent-blue: 207 89% 61%;
+    --fleet-accent-green: 142 76% 36%;
+    --fleet-accent-orange: 24 95% 53%;
+    --fleet-accent-yellow: 54 91% 68%;
+    
+    /* Pastel Backgrounds */
+    --fleet-bg-purple: 262 100% 97%;
+    --fleet-bg-pink: 330 100% 97%;
+    --fleet-bg-blue: 207 100% 97%;
+    --fleet-bg-green: 142 100% 96%;
+    --fleet-bg-orange: 24 100% 96%;
+    --fleet-bg-yellow: 54 100% 95%;
+    
+    /* Text colors for contrast */
+    --fleet-text-purple: 262 83% 25%;
+    --fleet-text-pink: 330 81% 25%;
+    --fleet-text-blue: 207 89% 25%;
+    --fleet-text-green: 142 76% 18%;
+    --fleet-text-orange: 24 95% 25%;
+    --fleet-text-yellow: 54 91% 35%;
   }
 
   .dark {
@@ -99,5 +121,42 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Fleet-specific utility classes */
+@layer utilities {
+  .fleet-gradient-purple {
+    background: linear-gradient(135deg, hsl(var(--fleet-bg-purple)) 0%, hsl(var(--fleet-bg-pink)) 100%);
+  }
+  
+  .fleet-gradient-blue {
+    background: linear-gradient(135deg, hsl(var(--fleet-bg-blue)) 0%, hsl(var(--fleet-bg-purple)) 100%);
+  }
+  
+  .fleet-gradient-green {
+    background: linear-gradient(135deg, hsl(var(--fleet-bg-green)) 0%, hsl(var(--fleet-bg-blue)) 100%);
+  }
+  
+  .fleet-gradient-orange {
+    background: linear-gradient(135deg, hsl(var(--fleet-bg-orange)) 0%, hsl(var(--fleet-bg-yellow)) 100%);
+  }
+  
+  .fleet-text-purple {
+    color: hsl(var(--fleet-text-purple));
+  }
+  
+  .fleet-text-blue {
+    color: hsl(var(--fleet-text-blue));
+  }
+  
+  .fleet-text-green {
+    color: hsl(var(--fleet-text-green));
+  }
+  
+  .fleet-bg-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
