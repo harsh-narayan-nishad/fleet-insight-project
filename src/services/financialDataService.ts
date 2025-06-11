@@ -1,4 +1,3 @@
-
 import { 
   EquipmentCategory, 
   VehiclePriceHistory, 
@@ -127,6 +126,98 @@ export class FinancialDataService {
     }
   }
 
+  static addForecastScenario(scenario: Omit<ForecastScenario, 'id' | 'createdAt' | 'updatedAt'>): ForecastScenario {
+    const scenarios = this.getForecastScenarios();
+    const newScenario: ForecastScenario = {
+      ...scenario,
+      id: this.generateId(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    scenarios.push(newScenario);
+    this.saveForecastScenarios(scenarios);
+    return newScenario;
+  }
+
+  static updateForecastScenario(id: string, updates: Partial<ForecastScenario>): ForecastScenario {
+    const scenarios = this.getForecastScenarios();
+    const index = scenarios.findIndex(s => s.id === id);
+    
+    if (index === -1) {
+      throw new Error('Forecast scenario not found');
+    }
+
+    scenarios[index] = {
+      ...scenarios[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+
+    this.saveForecastScenarios(scenarios);
+    return scenarios[index];
+  }
+
+  // Advanced Analysis Functions
+  static calculatePriceTrends(category: string): { trend: 'increasing' | 'decreasing' | 'stable', rate: number } {
+    const history = this.getPriceHistory()
+      .filter(entry => entry.category === category)
+      .sort((a, b) => a.year - b.year);
+
+    if (history.length < 2) {
+      return { trend: 'stable', rate: 0 };
+    }
+
+    const firstPrice = history[0].basePrice;
+    const lastPrice = history[history.length - 1].basePrice;
+    const years = history[history.length - 1].year - history[0].year;
+    
+    const annualRate = Math.pow(lastPrice / firstPrice, 1 / years) - 1;
+    
+    let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
+    if (annualRate > 0.02) trend = 'increasing';
+    else if (annualRate < -0.02) trend = 'decreasing';
+    
+    return { trend, rate: annualRate * 100 };
+  }
+
+  static getReplacementRecommendations(currentYear: number): Array<{
+    category: string;
+    urgency: 'high' | 'medium' | 'low';
+    reason: string;
+    estimatedCost: number;
+  }> {
+    const categories = this.getEquipmentCategories();
+    const priceHistory = this.getPriceHistory();
+    
+    return categories.map(category => {
+      const latestPrice = priceHistory
+        .filter(p => p.category === category.name)
+        .sort((a, b) => b.year - a.year)[0];
+      
+      const basePrice = latestPrice?.basePrice || 50000;
+      const avgAge = 8; // Mock average age
+      
+      let urgency: 'high' | 'medium' | 'low' = 'low';
+      let reason = 'Normal replacement cycle';
+      
+      if (avgAge > category.defaultLifespan + 2) {
+        urgency = 'high';
+        reason = 'Exceeds recommended lifespan';
+      } else if (avgAge > category.defaultLifespan) {
+        urgency = 'medium';
+        reason = 'Approaching replacement time';
+      }
+      
+      return {
+        category: category.name,
+        urgency,
+        reason,
+        estimatedCost: basePrice,
+      };
+    });
+  }
+
   // CSV Export Functions
   static exportToCSV(type: CSVExportData['type']): string {
     let data: any[] = [];
@@ -134,7 +225,6 @@ export class FinancialDataService {
 
     switch (type) {
       case 'cost-parameters':
-        // Get current cost parameters from the existing service
         data = [this.getCurrentCostParameters()];
         filename = `cost-parameters-${new Date().toISOString().split('T')[0]}.csv`;
         break;
@@ -163,13 +253,38 @@ export class FinancialDataService {
       
       switch (type) {
         case 'equipment-categories':
-          this.saveEquipmentCategories(parsed as EquipmentCategory[]);
+          // Validate and transform data
+          const categories = parsed.map(item => ({
+            ...item,
+            id: item.id || this.generateId(),
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            defaultLifespan: parseInt(item.defaultLifespan) || 8,
+          }));
+          this.saveEquipmentCategories(categories as EquipmentCategory[]);
           break;
         case 'price-history':
-          this.savePriceHistory(parsed as VehiclePriceHistory[]);
+          const history = parsed.map(item => ({
+            ...item,
+            id: item.id || this.generateId(),
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            year: parseInt(item.year) || new Date().getFullYear(),
+            basePrice: parseFloat(item.basePrice) || 0,
+            evPrice: item.evPrice ? parseFloat(item.evPrice) : undefined,
+          }));
+          this.savePriceHistory(history as VehiclePriceHistory[]);
           break;
         case 'forecast-results':
-          this.saveForecastScenarios(parsed as ForecastScenario[]);
+          const scenarios = parsed.map(item => ({
+            ...item,
+            id: item.id || this.generateId(),
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            parameters: typeof item.parameters === 'string' ? JSON.parse(item.parameters) : item.parameters,
+            results: item.results && typeof item.results === 'string' ? JSON.parse(item.results) : item.results,
+          }));
+          this.saveForecastScenarios(scenarios as ForecastScenario[]);
           break;
         default:
           throw new Error('Invalid import type');
@@ -236,11 +351,30 @@ export class FinancialDataService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
+      {
+        id: 'price-3',
+        category: 'Small Vehicles',
+        year: 2023,
+        basePrice: 33000,
+        evPrice: 43000,
+        source: 'Historical Data',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'price-4',
+        category: 'Large Vehicles',
+        year: 2023,
+        basePrice: 72000,
+        evPrice: 92000,
+        source: 'Historical Data',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
     ];
   }
 
   private static getCurrentCostParameters(): any {
-    // This would integrate with the existing cost parameters service
     return {
       inflationRate: 3.2,
       tariffRate: 2.5,
@@ -259,6 +393,9 @@ export class FinancialDataService {
       ...data.map(row => 
         headers.map(header => {
           const value = row[header];
+          if (typeof value === 'object' && value !== null) {
+            return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+          }
           return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value;
         }).join(',')
       )
@@ -276,7 +413,18 @@ export class FinancialDataService {
       const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
       const obj: any = {};
       headers.forEach((header, index) => {
-        obj[header] = values[index] || '';
+        let value = values[index] || '';
+        
+        // Try to parse JSON for object fields
+        if (value.startsWith('{') || value.startsWith('[')) {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            // Keep as string if JSON parsing fails
+          }
+        }
+        
+        obj[header] = value;
       });
       return obj;
     });

@@ -1,28 +1,19 @@
 
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { 
-  Home, 
-  TrendingUp, 
-  Truck, 
-  FileText, 
-  Settings, 
-  ChevronLeft,
-  LayoutDashboard,
-  Calendar
+  BarChart3, 
+  Calendar,
+  Settings,
+  FileText,
+  Users,
+  TrendingUp,
+  Database,
+  Wrench,
+  TargetIcon,
+  GitBranch
 } from 'lucide-react';
-
-const menuItems = [
-  { id: 'fleet-analytics', label: 'Overview', icon: Home, path: '/fleet-analytics' },
-  { id: 'executive', label: 'Executive', icon: LayoutDashboard, path: '/executive' },
-  { id: 'forecast', label: 'Forecasts', icon: TrendingUp, path: '/forecast' },
-  { id: 'inventory', label: 'Vehicles', icon: Truck, path: '/inventory' },
-  { id: 'reports', label: 'Reports', icon: FileText, path: '/reports' },
-  { id: 'timeline', label: 'Timeline', icon: Calendar, path: '/timeline' },
-  { id: 'parameters', label: 'Settings', icon: Settings, path: '/parameters' },
-];
 
 interface SidebarProps {
   activeTab: string;
@@ -30,83 +21,94 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const handleNavigation = (item: typeof menuItems[0]) => {
-    onTabChange(item.id);
-    navigate(item.path);
-  };
+  const menuItems = [
+    {
+      id: 'fleet-analytics',
+      label: 'Fleet Analytics',
+      icon: BarChart3,
+      path: '/fleet-analytics',
+    },
+    {
+      id: 'timeline',
+      label: 'Timeline View',
+      icon: Calendar,
+      path: '/timeline',
+    },
+    {
+      id: 'inventory',
+      label: 'Vehicle Inventory',
+      icon: Database,
+      path: '/inventory',
+    },
+    {
+      id: 'equipment',
+      label: 'Equipment Management',
+      icon: Wrench,
+      path: '/equipment',
+    },
+    {
+      id: 'forecasting',
+      label: 'Forecasting Engine',
+      icon: TargetIcon,
+      path: '/forecasting',
+    },
+    {
+      id: 'parameters',
+      label: 'Cost Parameters',
+      icon: Settings,
+      path: '/parameters',
+    },
+    {
+      id: 'forecast',
+      label: 'Forecast Dashboard',
+      icon: TrendingUp,
+      path: '/forecast',
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      icon: FileText,
+      path: '/reports',
+    },
+    {
+      id: 'executive',
+      label: 'Executive View',
+      icon: Users,
+      path: '/executive',
+    },
+  ];
 
   return (
-    <div className={cn(
-      "bg-white border-r border-slate-200 shadow-sm transition-all duration-300 flex flex-col",
-      isCollapsed ? "w-16" : "w-64"
-    )}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200">
-        {!isCollapsed && (
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-teal-600 to-blue-600 rounded-lg flex items-center justify-center">
-              <Truck className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold text-slate-800">Fleet Insight</span>
-          </div>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8 p-0"
-        >
-          <ChevronLeft className={cn(
-            "h-4 w-4 transition-transform",
-            isCollapsed && "rotate-180"
-          )} />
-        </Button>
+    <div className="w-64 bg-white border-r border-slate-200 flex flex-col h-full">
+      <div className="p-6 border-b border-slate-200">
+        <h1 className="text-xl font-bold text-slate-900">Fleet Capital Planning</h1>
+        <p className="text-sm text-slate-600 mt-1">Vehicle Replacement Forecasting</p>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-2">
-        <div className="space-y-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path || activeTab === item.id;
-            
-            return (
+      
+      <nav className="flex-1 p-4 space-y-2">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          
+          return (
+            <Link key={item.id} to={item.path}>
               <Button
-                key={item.id}
-                variant="ghost"
+                variant={isActive ? "default" : "ghost"}
                 className={cn(
-                  "w-full justify-start text-left transition-all duration-200",
-                  isCollapsed ? "px-2" : "px-3",
-                  isActive && "bg-teal-50 text-teal-700 border-r-2 border-teal-600",
-                  !isActive && "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  "w-full justify-start gap-3 h-10",
+                  isActive && "bg-blue-600 text-white hover:bg-blue-700"
                 )}
-                onClick={() => handleNavigation(item)}
+                onClick={() => onTabChange(item.id)}
               >
-                <Icon className={cn(
-                  "h-4 w-4",
-                  !isCollapsed && "mr-3"
-                )} />
-                {!isCollapsed && (
-                  <span className="truncate">{item.label}</span>
-                )}
+                <Icon className="h-4 w-4" />
+                {item.label}
               </Button>
-            );
-          })}
-        </div>
+            </Link>
+          );
+        })}
       </nav>
-
-      {/* Footer */}
-      {!isCollapsed && (
-        <div className="p-4 border-t border-slate-200">
-          <div className="text-xs text-slate-500 text-center">
-            Fleet Management v2.0
-          </div>
-        </div>
-      )}
     </div>
   );
 };
