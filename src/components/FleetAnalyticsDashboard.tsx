@@ -6,11 +6,13 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell
 } from 'recharts';
-import { TrendingUp, DollarSign, Filter, Calendar, BarChart3 } from 'lucide-react';
+import { TrendingUp, DollarSign, Filter, Calendar, BarChart3, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { FleetDataService } from '@/services/fleetDataService';
 import { DrillThroughData, ChartDataPoint } from '@/types/fleet';
 import DrillThroughModal from './DrillThroughModal';
 import FleetFiltersPanel from './FleetFiltersPanel';
+import InteractiveReportTemplates from './reports/InteractiveReportTemplates';
 import { useNavigate } from 'react-router-dom';
 
 const FleetAnalyticsDashboard = () => {
@@ -111,6 +113,18 @@ const FleetAnalyticsDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center gap-4">
+        <Button variant="outline" onClick={() => navigate('/')}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Dashboard
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Fleet Analytics Dashboard</h1>
+          <p className="text-slate-600">Comprehensive fleet management and analytics</p>
+        </div>
+      </div>
+
       {/* Filters Panel */}
       <FleetFiltersPanel 
         activeFilters={activeFilters}
@@ -335,17 +349,15 @@ const FleetAnalyticsDashboard = () => {
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">
-          <Card className="bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200/50">
+          <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50">
             <CardHeader>
-              <CardTitle className="text-slate-700">Reports & Analytics</CardTitle>
+              <CardTitle className="text-slate-700">Interactive Report Templates</CardTitle>
               <CardDescription className="text-slate-600">
-                Export and detailed reporting
+                Generate, download, and analyze comprehensive fleet reports
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-8 text-center">
-                <p className="text-slate-500">Reports tab content coming in next phase...</p>
-              </div>
+              <InteractiveReportTemplates />
             </CardContent>
           </Card>
         </TabsContent>
@@ -393,3 +405,5 @@ const FleetAnalyticsDashboard = () => {
 };
 
 export default FleetAnalyticsDashboard;
+
+</edits_to_apply>
