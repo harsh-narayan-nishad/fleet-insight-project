@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Truck, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 interface LoginPageProps {
@@ -258,12 +256,13 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
 
             <div className="text-center text-sm text-slate-500">
               Don't have an account?{' '}
-              <Link
-                to="/signup"
-                className="text-teal-600 hover:text-teal-700 font-medium"
+              <Button // #signup
+                variant="link" // #signup
+                className="px-0 text-teal-600 hover:text-teal-700 font-medium h-auto" // #signup
+                onClick={() => window.location.href = "/signup"} // #signup
               >
-                Create one here
-              </Link>
+                Create one here {/* #signup */}
+              </Button>
             </div>
           </CardContent>
         </Card>

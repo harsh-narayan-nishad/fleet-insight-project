@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -118,7 +117,7 @@ const FleetAnalyticsDashboard = () => {
         onFiltersChange={handleFiltersChange}
       />
 
-      {/* Main Content */}
+      {/* Main Content - Full Width */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="bg-gradient-to-r from-violet-100 to-pink-100 p-1 rounded-xl">
           <TabsTrigger 

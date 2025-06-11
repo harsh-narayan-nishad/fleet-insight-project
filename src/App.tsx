@@ -13,6 +13,7 @@ import ParametersPage from './pages/ParametersPage';
 import EquipmentPage from './pages/EquipmentPage';
 import FleetAnalyticsPage from './pages/FleetAnalyticsPage';
 import AdvancedAnalyticsPage from './pages/AdvancedAnalyticsPage';
+import SignupPage from './pages/SignupPage'; // #signup #routing
 import NotFound from './pages/NotFound';
 import './App.css';
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/equipment" element={<EquipmentPage />} />
           <Route path="/fleet-analytics" element={<FleetAnalyticsPage />} />
           <Route path="/advanced-analytics" element={<AdvancedAnalyticsPage />} />
+          <Route path="/signup" element={<SignupPage />} /> {/* #signup #routing */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

@@ -18,6 +18,7 @@ import AdvancedAnalytics from "@/components/AdvancedAnalytics";
 import EnterpriseReporting from "@/components/EnterpriseReporting";
 import FleetAnalyticsDashboard from "@/components/FleetAnalyticsDashboard";
 import LoginPage from "@/components/auth/LoginPage";
+import SignupPage from "@/components/auth/SignupPage"; // #signup
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
 import QuickFilters from "@/components/dashboard/QuickFilters";
@@ -32,6 +33,7 @@ const Index = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("2024-06-07");
   const [activeTab, setActiveTab] = useState("fleet-analytics");
   const [forecastKey, setForecastKey] = useState(0);
+  const [showSignup, setShowSignup] = useState(false); // #signup
   
   // Enhanced sample data with corrected types
   const [fleetData, setFleetData] = useState([
@@ -121,14 +123,31 @@ const Index = () => {
     if (username && password) {
       setIsAuthenticated(true);
       setCurrentUser(username);
+      setShowSignup(false); // #signup
       return true;
     }
     return false;
   };
 
+  // #signup - Mock signup function
+  const handleSignup = async (username: string, email: string, password: string, consent: boolean): Promise<boolean> => { // #signup
+    // #signup - Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000)); // #signup
+    
+    // #signup - Mock authentication - in real app, this would call your auth API
+    if (username && email && password && consent) { // #signup
+      setIsAuthenticated(true); // #signup
+      setCurrentUser(username); // #signup
+      setShowSignup(false); // #signup
+      return true; // #signup
+    }
+    return false; // #signup
+  }; // #signup
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setCurrentUser('');
+    setShowSignup(false); // #signup
   };
 
   const handleExport = () => {
@@ -152,6 +171,11 @@ const Index = () => {
     setLastUpdated(new Date().toISOString().split('T')[0]);
   };
 
+  // #signup - Show signup page if requested
+  if (!isAuthenticated && showSignup) { // #signup
+    return <SignupPage onSignup={handleSignup} />; // #signup
+  } // #signup
+
   if (!isAuthenticated) {
     return <LoginPage onLogin={handleLogin} />;
   }
@@ -169,81 +193,69 @@ const Index = () => {
           onLogout={handleLogout}
         />
 
-        {/* Main Content */}
+        {/* Main Content - Full Width */}
         <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Quick Filters */}
-            <QuickFilters onFiltersChange={handleFiltersChange} />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <TabsContent value="fleet-analytics" className="space-y-6">
+                <FleetAnalyticsDashboard />
+              </TabsContent>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-3">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                  <TabsContent value="fleet-analytics" className="space-y-6">
-                    <FleetAnalyticsDashboard />
-                  </TabsContent>
+              <TabsContent value="executive" className="space-y-6">
+                <ExecutiveDashboard />
+              </TabsContent>
 
-                  <TabsContent value="executive" className="space-y-6">
-                    <ExecutiveDashboard />
-                  </TabsContent>
+              <TabsContent value="advanced" className="space-y-6">
+                <AdvancedAnalytics />
+              </TabsContent>
 
-                  <TabsContent value="advanced" className="space-y-6">
-                    <AdvancedAnalytics />
-                  </TabsContent>
+              <TabsContent value="reports" className="space-y-6">
+                <EnterpriseReporting />
+              </TabsContent>
 
-                  <TabsContent value="reports" className="space-y-6">
-                    <EnterpriseReporting />
-                  </TabsContent>
+              <TabsContent value="quality">
+                <DataValidation data={fleetData} onDataCleaned={handleDataCleaned} />
+              </TabsContent>
 
-                  <TabsContent value="quality">
-                    <DataValidation data={fleetData} onDataCleaned={handleDataCleaned} />
-                  </TabsContent>
+              <TabsContent value="timeline">
+                <DateDrillDown vehicles={fleetData} />
+              </TabsContent>
 
-                  <TabsContent value="timeline">
-                    <DateDrillDown vehicles={fleetData} />
-                  </TabsContent>
+              <TabsContent value="inventory">
+                <VehicleInventory />
+              </TabsContent>
 
-                  <TabsContent value="inventory">
-                    <VehicleInventory />
-                  </TabsContent>
+              <TabsContent value="forecast">
+                <div className="space-y-6">
+                  <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-slate-900">Fleet Forecast Analysis</CardTitle>
+                      <CardDescription>
+                        Detailed 10-year projections with scenario planning
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">Annual Spending Projection</h3>
+                          <ForecastChart key={`forecast-detail-${forecastKey}`} />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">Vehicle Mix Evolution</h3>
+                          <PurchaseMixChart key={`mix-detail-${forecastKey}`} />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <InteractiveCharts vehicles={fleetData} />
+                </div>
+              </TabsContent>
 
-                  <TabsContent value="forecast">
-                    <div className="space-y-6">
-                      <Card className="bg-white/80 backdrop-blur-sm border-slate-200 shadow-lg">
-                        <CardHeader>
-                          <CardTitle className="text-slate-900">Fleet Forecast Analysis</CardTitle>
-                          <CardDescription>
-                            Detailed 10-year projections with scenario planning
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div>
-                              <h3 className="text-lg font-semibold mb-4">Annual Spending Projection</h3>
-                              <ForecastChart key={`forecast-detail-${forecastKey}`} />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold mb-4">Vehicle Mix Evolution</h3>
-                              <PurchaseMixChart key={`mix-detail-${forecastKey}`} />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <InteractiveCharts vehicles={fleetData} />
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="parameters">
-                    <CostParametersPage onParametersChanged={handleParametersChanged} />
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* Alerts Panel */}
-              <div className="lg:col-span-1">
-                <AlertsPanel />
-              </div>
-            </div>
+              <TabsContent value="parameters">
+                <CostParametersPage onParametersChanged={handleParametersChanged} />
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>
@@ -252,3 +264,5 @@ const Index = () => {
 };
 
 export default Index;
+
+}
