@@ -44,6 +44,15 @@ function App() {
               onLogout={handleLogout}
             />
           } />
+          <Route path="/fleet-analytics" element={
+            <Dashboard 
+              currentUser={mockCurrentUser}
+              lastUpdated={mockLastUpdated}
+              dataQualityScore={mockDataQualityScore}
+              onExport={handleExport}
+              onLogout={handleLogout}
+            />
+          } />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/forecast" element={<ForecastPage />} />
           <Route path="/reports" element={<ReportsPage />} />
@@ -52,7 +61,6 @@ function App() {
           <Route path="/forecasting" element={<ForecastingPage />} />
           <Route path="/parameters" element={<ParametersPage />} />
           <Route path="/equipment" element={<EquipmentPage />} />
-          <Route path="/fleet-analytics" element={<FleetAnalyticsPage />} />
           <Route path="/advanced-analytics" element={<AdvancedAnalyticsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
