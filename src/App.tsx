@@ -17,12 +17,33 @@ import NotFound from './pages/NotFound';
 import './App.css';
 
 function App() {
+  // Mock data and handlers for dashboard props
+  const mockCurrentUser = "Fleet Manager";
+  const mockLastUpdated = new Date().toISOString().split('T')[0];
+  const mockDataQualityScore = 95;
+  
+  const handleExport = () => {
+    console.log('Exporting data...');
+  };
+  
+  const handleLogout = () => {
+    console.log('Logging out...');
+  };
+
   return (
     <Router>
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <Dashboard 
+              currentUser={mockCurrentUser}
+              lastUpdated={mockLastUpdated}
+              dataQualityScore={mockDataQualityScore}
+              onExport={handleExport}
+              onLogout={handleLogout}
+            />
+          } />
           <Route path="/inventory" element={<InventoryPage />} />
           <Route path="/forecast" element={<ForecastPage />} />
           <Route path="/reports" element={<ReportsPage />} />
